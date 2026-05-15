@@ -1,7 +1,15 @@
 # /pdf-to-wiki
 
 Drive에 있는 대용량 PDF를 NotebookLM에 외주화하여 분석하고,
-결과를 ~/vault/00_Wiki/AI_Generated/ 에 Obsidian 노트로 저장한다.
+결과를 `OUTPUT_DIR`에 Obsidian 노트로 저장한다.
+
+기본 출력 경로:
+
+```text
+OUTPUT_DIR=~/vault/00_Wiki/AI_Generated
+```
+
+설치 후 위 경로를 본인 Obsidian vault의 저장 위치로 바꿔라.
 
 **중요**: PDF 파일 내용을 직접 읽지 않는다. Drive URL만 NotebookLM에 전달한다.
 `mcp__claude_ai_Google_Drive__download_file_content` 호출 금지.
@@ -23,7 +31,7 @@ Drive에 있는 대용량 PDF를 NotebookLM에 외주화하여 분석하고,
 ### Step 1 — Drive 파일 메타데이터 확인
 
 `mcp__claude_ai_Google_Drive__get_file_metadata` 또는 `mcp__claude_ai_Google_Drive__search_files`로
-파일명과 Drive URL을 확인한다. 파일 내용은 읽지 않는다.
+파일명, Drive URL, Drive file ID를 확인한다. 파일 내용은 읽지 않는다.
 
 ### Step 2 — NotebookLM 노트북 생성
 
@@ -33,11 +41,28 @@ Drive에 있는 대용량 PDF를 NotebookLM에 외주화하여 분석하고,
 ### Step 3 — Drive PDF를 소스로 추가
 
 `source_add` 도구로 Drive URL을 NotebookLM 소스로 추가:
-- type: `drive`
-- url: Step 1에서 얻은 Drive URL
+- `source_type`: `drive`
+- `document_id`: Step 1에서 얻은 Drive file ID
+- `doc_type`: `pdf`
+- `wait`: `true`
+- `wait_timeout`: `120.0`
 - NotebookLM이 내부에서 PDF를 가져와 처리 (Claude 컨텍스트 비통과)
 
-소스 처리 완료까지 30~60초 대기. `source_list`로 상태 확인.
+예상 호출 형태:
+
+```text
+source_add(
+  notebook_id="{notebook_id}",
+  source_type="drive",
+  document_id="{drive_file_id}",
+  doc_type="pdf",
+  wait=True,
+  wait_timeout=120.0
+)
+```
+
+설치된 `notebooklm-mcp-cli` 버전에 따라 파라미터명이 다르면 현재 MCP tool schema를 우선한다.
+소스 처리 완료까지 대기한다. 상태 확인이 필요하면 `source_list_drive` 또는 현재 노출된 source 조회 도구를 사용한다.
 
 ### Step 4 — 구조화 분석 쿼리
 
@@ -72,7 +97,7 @@ Drive에 있는 대용량 PDF를 NotebookLM에 외주화하여 분석하고,
 
 ### Step 6 — Obsidian 노트 생성
 
-아래 템플릿으로 ~/vault/00_Wiki/AI_Generated/{wiki_title}.md 파일 생성:
+아래 템플릿으로 `{OUTPUT_DIR}/{wiki_title}.md` 파일 생성:
 
 ```markdown
 ---

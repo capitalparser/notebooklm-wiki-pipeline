@@ -8,6 +8,8 @@ Drive에 있는 대용량 PDF를 Claude Code 컨텍스트에 직접 넣지 않�
 /pdf-to-wiki https://drive.google.com/file/d/YOUR_FILE_ID
 ```
 
+> 기본 출력 경로는 예시입니다. 설치 후 `commands/pdf-to-wiki.md`의 `OUTPUT_DIR`을 본인 Obsidian vault 경로로 바꿔서 사용하세요.
+
 ---
 
 ## 왜 필요한가
@@ -100,15 +102,19 @@ cp commands/pdf-to-wiki.md ~/.claude/commands/pdf-to-wiki.md
 
 Claude Code 세션을 재시작하면 `/pdf-to-wiki`가 슬래시 커맨드로 자동 노출됩니다.
 
-**6. 출력 디렉토리 준비**
+**6. 출력 디렉토리 설정**
 
-생성된 노트가 저장될 디렉토리를 만듭니다. 본인 Obsidian vault 경로에 맞게 조정하세요.
+`~/.claude/commands/pdf-to-wiki.md` 상단의 `OUTPUT_DIR`을 본인 Obsidian vault 경로에 맞게 수정합니다.
+
+```text
+OUTPUT_DIR=~/your-obsidian-vault/AI_Generated
+```
+
+생성된 노트가 저장될 디렉토리를 만듭니다.
 
 ```bash
 mkdir -p ~/your-obsidian-vault/AI_Generated
 ```
-
-> `commands/pdf-to-wiki.md` 안의 저장 경로(`~/vault/00_Wiki/AI_Generated/`)도 본인 경로로 수정하세요.
 
 ---
 
@@ -134,11 +140,28 @@ Claude Code 세션에서 Drive URL 또는 파일 ID를 넘깁니다.
 
 1. Drive 파일 메타데이터 확인 (파일명, URL)
 2. NotebookLM 노트북 생성
-3. Drive PDF를 NotebookLM 소스로 추가 (30~60초 처리 대기)
+3. Drive PDF를 NotebookLM 소스로 추가 (처리 완료까지 대기)
 4. 구조화 분석 쿼리 전송
 5. 분석 결과를 Obsidian 노트로 변환 + `[[wikilink]]` 보강
-6. `AI_Generated/` 디렉토리에 저장
+6. `OUTPUT_DIR` 디렉토리에 저장
 7. 완료 보고 (저장 경로, NotebookLM 노트북 ID, 절감 토큰 추정)
+
+### NotebookLM MCP 호출 형태
+
+`notebooklm-mcp-cli`의 최신 MCP 도구는 통합 `source_add`를 사용합니다. Drive PDF는 URL 문자열보다 Drive 문서 ID를 우선 사용합니다.
+
+```text
+source_add(
+  notebook_id="{notebook_id}",
+  source_type="drive",
+  document_id="{drive_file_id}",
+  doc_type="pdf",
+  wait=True,
+  wait_timeout=120.0
+)
+```
+
+설치 버전에 따라 `source_add` 파라미터가 조금 다를 수 있습니다. 동작이 맞지 않으면 `nlm doctor`, `nlm setup list`, `uv tool upgrade notebooklm-mcp-cli`로 설치 상태를 먼저 확인하세요.
 
 ### 출력 노트 형식
 
@@ -221,6 +244,9 @@ Free tier에서는 쿼리가 ~50회/일로 제한됩니다. 대량 처리 중 �
 .
 ├── commands/
 │   └── pdf-to-wiki.md      ← /pdf-to-wiki 슬래시 커맨드 (설치 시 ~/.claude/commands/ 에 복사)
+├── examples/
+│   ├── input.md            ← 실행 입력 예시
+│   └── output-note.md      ← 생성 노트 예시
 └── docs/
     └── adr/
         └── 0001-notebooklm-mcp-approach.md   ← NotebookLM vs Gemini API 선택 근거
@@ -236,7 +262,13 @@ NotebookLM MCP 방식을 채택한 이유는 `docs/adr/0001-notebooklm-mcp-appro
 
 ## 로드맵
 
-- [ ] 여러 PDF 일괄 처리 플로우
-- [ ] 생성 노트의 wikilink 후보 자동 점검
-- [ ] NotebookLM 노트북 재사용 정책
-- [ ] 샘플 입력/출력 노트 추가
+- [ ] 여러 PDF 일괄 처리 플로우 ([#3](https://github.com/capitalparser/notebooklm-wiki-pipeline/issues/3))
+- [ ] 생성 노트의 wikilink 후보 자동 점검 ([#1](https://github.com/capitalparser/notebooklm-wiki-pipeline/issues/1))
+- [ ] NotebookLM 노트북 재사용 정책 ([#2](https://github.com/capitalparser/notebooklm-wiki-pipeline/issues/2))
+- [x] 샘플 입력/출력 노트 추가 (`examples/`)
+
+로드맵 항목은 GitHub Issues로 관리합니다.
+
+## 라이선스
+
+MIT License. 자세한 내용은 [LICENSE](LICENSE)를 참고하세요.
