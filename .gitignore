@@ -1,0 +1,3 @@
+config/notebooks.local.json
+__pycache__/
+*.pyc

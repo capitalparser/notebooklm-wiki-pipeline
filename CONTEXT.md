@@ -1,5 +1,9 @@
 # CONTEXT — 도메인 사전
 
+## Project Profile
+- 개요: PDF와 문서를 NotebookLM에 넣어 요약, 근거, wiki note로 전환하는 로컬 지식 처리 파이프라인입니다.
+- 목적: 긴 자료를 수동으로 읽고 옮기는 비용을 줄이고, vault에 출처가 남는 재사용 가능한 wiki 지식으로 정리합니다.
+
 ## 핵심 개념
 
 **토큰 외주화 (Token Offloading)**
@@ -21,10 +25,22 @@ Claude에는 URL 문자열(수십 토큰)만 전달 — 파일 내용 비통과.
 `[[wikilink]]` 포함 마크다운 파일. `~/vault/00_Wiki/AI_Generated/` 저장.
 기존 Wiki 페이지와 연결되도록 Claude가 wikilink를 추가.
 
+**Topic Notebook Registry**
+주제별 NotebookLM 노트북 ID, 라우팅 키워드, 이미 추가된 Drive source를 기록하는 JSON registry.
+명시 topic 또는 제목 키워드가 매칭되면 관련 PDF를 같은 주제 NotebookLM 노트북에 추가한다.
+
+**Target Source Query Scope**
+주제별 Notebook에는 여러 PDF가 함께 들어갈 수 있으므로, 신규 Wiki 노트 생성용 쿼리는 대상 PDF만 primary scope로 삼는다.
+기존 topic PDF는 비교/연결 섹션에서만 사용한다.
+
+**Source Scoped Topic Query**
+신규 PDF 노트 생성 시 기본 모드. PDF는 주제별 Notebook에 묶되, query 단계에서 target source_id 또는 drive_file_id를 명시해
+대상 PDF만 primary 근거로 사용한다. source 지정 query가 불명확할 때만 single-source notebook을 fallback으로 쓴다.
+
 ## 금지 패턴
 
 - `mcp__claude_ai_Google_Drive__download_file_content` — 토큰 낭비 원인, 사용 금지
-- NotebookLM 노트북 1개에 무관한 PDF 혼재 — 노트북은 PDF 1개당 1개 원칙
+- NotebookLM 노트북 1개에 무관한 PDF 혼재 — 주제가 불명확하면 single-source notebook으로 격리
 
 ## 관련 MCP 서버
 

@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "default_policy": "single_source_notebook",
+  "default_extraction_mode": "source_scoped_topic_query",
+  "topics": [
+    {
+      "id": "audit-accounting",
+      "label": "Audit and Accounting",
+      "notebook_id": "NOTEBOOKLM_NOTEBOOK_ID_FOR_AUDIT",
+      "notebook_title": "Wiki Topic: Audit and Accounting",
+      "reuse_policy": "topic",
+      "routing_keywords": ["감사", "회계", "K-IFRS", "IFRS", "재무제표", "주석"],
+      "sources": [
+        {
+          "drive_file_id": "EXAMPLE_DRIVE_FILE_ID",
+          "source_id": "EXAMPLE_NOTEBOOKLM_SOURCE_ID",
+          "title": "K-IFRS 1109 금융상품"
+        }
+      ]
+    },
+    {
+      "id": "stablecoin-payments",
+      "label": "Stablecoin and Payments",
+      "notebook_id": "NOTEBOOKLM_NOTEBOOK_ID_FOR_STABLECOIN",
+      "notebook_title": "Wiki Topic: Stablecoin and Payments",
+      "reuse_policy": "topic",
+      "routing_keywords": ["stablecoin", "payment", "x402", "RWA", "USDC", "스테이블코인"],
+      "sources": []
+    },
+    {
+      "id": "korea-market",
+      "label": "Korea Market",
+      "notebook_id": "NOTEBOOKLM_NOTEBOOK_ID_FOR_KOREA_MARKET",
+      "notebook_title": "Wiki Topic: Korea Market",
+      "reuse_policy": "topic",
+      "routing_keywords": ["한국", "코스피", "코스닥", "금감원", "공시", "DART"],
+      "sources": []
+    }
+  ]
+}

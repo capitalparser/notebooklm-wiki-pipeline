@@ -1,158 +1,190 @@
 # NotebookLM Wiki Pipeline
 
-Drive에 있는 대용량 PDF를 Claude Code 컨텍스트에 직접 넣지 않고, NotebookLM이 먼저 읽게 한 뒤 결과만 받아 Obsidian Wiki 노트로 정리하는 토큰 절감 파이프라인입니다.
+[한국어 README](README.ko.md)
 
-설치 후 Claude Code에서 한 줄로 실행합니다.
+Turn large Google Drive PDFs into Obsidian wiki notes without loading the full PDF text into Claude or Codex context. NotebookLM reads the source, and the agent receives only the structured answer needed to create a reusable note.
 
+**vNext update:** reuse one NotebookLM notebook per topic, while each new note-generation query is scoped to the newly attached or selected PDF source.
+
+That is the main product value:
+
+```text
+Topic notebook = reusable knowledge container
+MCP query with source_ids = target-PDF-only extraction
 ```
-/pdf-to-wiki https://drive.google.com/file/d/YOUR_FILE_ID
+
+```bash
+/pdf-to-wiki https://drive.google.com/file/d/YOUR_FILE_ID "K-IFRS 1109 Financial Instruments" --topic audit-accounting
 ```
 
-> 기본 출력 경로는 예시입니다. 설치 후 `commands/pdf-to-wiki.md`의 `OUTPUT_DIR`을 본인 Obsidian vault 경로로 바꿔서 사용하세요.
+![Actual NotebookLM source-scoped notebook screen](docs/assets/notebooklm-source-scoped-live.png)
+
+The screenshot above is an actual NotebookLM notebook screen from a live MCP test. The notebook contains multiple investment-book sources in one topic notebook, including Mark Minervini, William O'Neil, and Jesse Livermore PDFs. For note generation, the MCP call used `source_ids=[target_source_id]`, and NotebookLM returned `sources_used` with only the target Minervini source.
 
 ---
 
-## 왜 필요한가
+## Why This Matters
 
-AI 코딩 도구의 성능이 좋아질수록 병목은 모델 지능보다 컨텍스트 관리와 토큰 비용이 됩니다. 특히 PDF, 보고서, 기준서, 매뉴얼처럼 긴 문서를 다룰 때는 원문 전체를 넣는 방식이 빠르게 한계에 부딪힙니다.
+The old safe pattern was:
 
-예를 들어 100페이지 PDF를 Drive MCP로 직접 읽으면 수만 토큰이 Claude 컨텍스트를 지나갑니다. 반면 이 파이프라인에서는 Claude Code가 PDF 본문을 직접 읽지 않습니다. Drive URL만 NotebookLM에 넘기고, NotebookLM이 내부에서 문서를 처리합니다. Claude Code는 NotebookLM의 분석 결과, 보통 수백~수천 토큰만 받아서 노트를 만듭니다.
+```text
+1 PDF = 1 NotebookLM notebook
+```
 
-| 방식 | Claude 컨텍스트에 들어오는 것 | 비용 |
-|------|-------------------------------|------|
-| PDF 직접 로드 | PDF 전체 텍스트 | 긴 문서일수록 토큰 급증 |
-| NotebookLM 경유 | Drive URL + 분석 결과 텍스트 | 원문 독해 비용을 NotebookLM으로 이동 |
+That avoids source contamination, but it does not scale well. Users who process many PDFs about the same topic end up with scattered one-off notebooks.
 
-## 대상 사용자
+The vNext pattern is:
 
-- 긴 PDF를 AI에게 자주 읽히지만 토큰 비용과 컨텍스트 오염이 부담스러운 사람
-- Google Drive, NotebookLM, Obsidian을 이미 업무 흐름에 쓰는 사람
-- "대충 요약"이 아니라 나중에 다시 찾을 수 있는 개인 Wiki 노트를 만들고 싶은 사람
-- Claude Code 같은 에이전트형 도구를 문서 처리 파이프라인의 조립자로 쓰고 싶은 사람
+```text
+1 topic = 1 reusable NotebookLM notebook
+1 new wiki note = query only 1 target source inside that notebook
+```
 
-## 아키텍처
+For example, an `investment-books` notebook can contain:
+
+- `Trade Like a Stock Market Wizard` by Mark Minervini
+- `Think & Trade Like a Champion` by Mark Minervini
+- `How to Make Money in Stocks` by William O'Neil
+- `Jesse Livermore's Stock Trading Bible`
+
+When you want a wiki note for only the Minervini PDF, call:
+
+```python
+notebook_query(
+    notebook_id="investment-books-topic-notebook",
+    source_ids=["target:minervini-superperformance"],
+    query="Summarize insights using only the target PDF."
+)
+```
+
+The notebook remains reusable for future topic-level questions, but the note extraction remains grounded in one selected PDF.
+
+## User Benefits
+
+- Reuse topic notebooks instead of creating one notebook per PDF.
+- Keep related PDFs together for later cross-document questions.
+- Generate a new wiki note from only the newly attached or selected source.
+- Reduce answer contamination by passing `source_ids=[target_source_id]`.
+- Record `target_source_id`, `sources_used`, and `query_scope` in the completion report.
+
+## Architecture
 
 ```text
 Google Drive PDF
   |
-  | source_add(drive_url)          ← URL만 전달. PDF 본문은 Claude 컨텍스트 비통과.
+  | pass Drive URL or file ID only
   v
-NotebookLM (내부 처리)
+Topic registry
   |
-  | notebook_query(분석 프롬프트)
+  | choose topic notebook by --topic or routing keywords
   v
-분석 결과 텍스트 (500~2,000 토큰)
+Reusable NotebookLM topic notebook
   |
-  | Claude Code — Markdown 구조화 + [[wikilink]] 보강
+  | notebook_query(source_ids=[target_source_id], query=...)
   v
-{your-obsidian-vault}/AI_Generated/{title}.md
+NotebookLM answer grounded in the target PDF
+  |
+  | agent formats Markdown and wikilinks
+  v
+Obsidian wiki note
 ```
 
----
+![Topic notebook routing flow](docs/assets/topic-notebook-flow.svg)
 
-## 전제 조건
+## Installation
 
-| 항목 | 설명 |
-|------|------|
-| Claude Code | claude.ai 계정 필요. Pro 이상 권장 (MCP 통합 지원) |
-| Google Drive 연결 | claude.ai → Settings → Integrations → Google Drive에서 OAuth 연결. **API 키 불필요.** |
-| NotebookLM 계정 | Google 계정으로 로그인. Free tier 사용 가능 (쿼리 ~50회/일 제한) |
-| Obsidian Vault | 로컬 Vault 디렉토리 경로 확인 필요 |
-| `uv` | Python 툴 설치 관리자. `brew install uv` 또는 [공식 설치](https://docs.astral.sh/uv/getting-started/installation/) |
+1. Connect Google Drive in Claude.
 
-## 설치
-
-**1. Google Drive를 claude.ai에 연결**
-
-별도 API 키 없이 OAuth로 연결합니다.
-
-```
-claude.ai → Settings → Integrations → Google Drive → Connect
+```text
+claude.ai -> Settings -> Integrations -> Google Drive -> Connect
 ```
 
-연결 후 Claude Code 세션에서 Google Drive MCP 도구가 자동으로 활성화됩니다.
-
-**2. `notebooklm-mcp-cli` 설치**
+2. Install `notebooklm-mcp-cli`.
 
 ```bash
 uv tool install notebooklm-mcp-cli
 ```
 
-**3. NotebookLM 로그인**
+3. Log in to NotebookLM.
 
 ```bash
 nlm login
 ```
 
-브라우저가 열리며 Google 계정으로 인증합니다. 쿠키 기반이며 2~4주마다 재인증이 필요합니다.
-
-**4. Claude Code에 MCP 서버 등록**
+4. Register the MCP server with Claude Code.
 
 ```bash
 nlm setup add claude-code
 ```
 
-**5. `/pdf-to-wiki` 슬래시 커맨드 등록**
-
-이 레포의 `commands/pdf-to-wiki.md`를 Claude Code 커맨드 디렉토리에 복사합니다.
+5. Install the slash command.
 
 ```bash
 cp commands/pdf-to-wiki.md ~/.claude/commands/pdf-to-wiki.md
 ```
 
-Claude Code 세션을 재시작하면 `/pdf-to-wiki`가 슬래시 커맨드로 자동 노출됩니다.
-
-**6. 출력 디렉토리 설정**
-
-`~/.claude/commands/pdf-to-wiki.md` 상단의 `OUTPUT_DIR`을 본인 Obsidian vault 경로에 맞게 수정합니다.
+6. Configure the output directory in `~/.claude/commands/pdf-to-wiki.md`.
 
 ```text
 OUTPUT_DIR=~/your-obsidian-vault/AI_Generated
 ```
 
-생성된 노트가 저장될 디렉토리를 만듭니다.
+## Topic Registry
+
+Copy the example registry and fill in your own NotebookLM notebook IDs.
 
 ```bash
-mkdir -p ~/your-obsidian-vault/AI_Generated
+cp config/notebooks.example.json config/notebooks.local.json
 ```
 
----
+Example:
 
-## 사용법
-
-### 기본 실행
-
-Claude Code 세션에서 Drive URL 또는 파일 ID를 넘깁니다.
-
+```json
+{
+  "default_policy": "single_source_notebook",
+  "default_extraction_mode": "source_scoped_topic_query",
+  "topics": [
+    {
+      "id": "investment-books",
+      "label": "Investment Books",
+      "notebook_id": "NOTEBOOKLM_NOTEBOOK_ID_FOR_INVESTMENT_BOOKS",
+      "routing_keywords": ["Minervini", "O'Neil", "Livermore", "investment"],
+      "sources": []
+    }
+  ]
+}
 ```
-/pdf-to-wiki https://drive.google.com/file/d/YOUR_FILE_ID
+
+Check the routing decision locally:
+
+```bash
+python3 scripts/notebook_registry.py \
+  "https://drive.google.com/file/d/YOUR_FILE_ID/view" \
+  --title "Trade Like a Stock Market Wizard" \
+  --topic investment-books \
+  --registry config/notebooks.local.json
 ```
 
-제목을 직접 지정하려면 두 번째 인자를 추가합니다.
+Expected decision shape:
 
+```json
+{
+  "topic_id": "investment-books",
+  "notebook_action": "reuse_topic_notebook",
+  "extraction_mode": "source_scoped_topic_query",
+  "extraction_notebook_action": "reuse_topic_notebook",
+  "topic_notebook_action": "query_target_source_in_topic",
+  "source_action": "add_source"
+}
 ```
-/pdf-to-wiki https://drive.google.com/file/d/YOUR_FILE_ID K-IFRS 1109 금융상품
-```
 
-### 실행 순서 (자동)
+## MCP Calls
 
-`/pdf-to-wiki`를 실행하면 Claude Code가 다음 단계를 자동으로 처리합니다.
-
-1. Drive 파일 메타데이터 확인 (파일명, URL)
-2. NotebookLM 노트북 생성
-3. Drive PDF를 NotebookLM 소스로 추가 (처리 완료까지 대기)
-4. 구조화 분석 쿼리 전송
-5. 분석 결과를 Obsidian 노트로 변환 + `[[wikilink]]` 보강
-6. `OUTPUT_DIR` 디렉토리에 저장
-7. 완료 보고 (저장 경로, NotebookLM 노트북 ID, 절감 토큰 추정)
-
-### NotebookLM MCP 호출 형태
-
-`notebooklm-mcp-cli`의 최신 MCP 도구는 통합 `source_add`를 사용합니다. Drive PDF는 URL 문자열보다 Drive 문서 ID를 우선 사용합니다.
+Add the PDF to the topic notebook:
 
 ```text
 source_add(
-  notebook_id="{notebook_id}",
+  notebook_id="{topic_notebook_id}",
   source_type="drive",
   document_id="{drive_file_id}",
   doc_type="pdf",
@@ -161,114 +193,94 @@ source_add(
 )
 ```
 
-설치 버전에 따라 `source_add` 파라미터가 조금 다를 수 있습니다. 동작이 맞지 않으면 `nlm doctor`, `nlm setup list`, `uv tool upgrade notebooklm-mcp-cli`로 설치 상태를 먼저 확인하세요.
+Then query only the target source:
 
-### 출력 노트 형식
+```text
+notebook_query(
+  notebook_id="{topic_notebook_id}",
+  source_ids=["{target_source_id}"],
+  query="{target-PDF-only prompt}"
+)
+```
 
-```markdown
----
+The prompt should also state the scope:
+
+```text
+primary_scope: target PDF only
+source_scoped_query: query only this target source_id
+topic_notebook_context: other PDFs in the same notebook may be used only for a separated comparison section
+```
+
+## Source Verification Gate
+
+The live test found an important operational gap: Drive search may return a wrong PDF when filenames are generic. Before generating the final note, run a short source verification query:
+
+```text
+Using only target_source_id, verify the document title, author, and topic.
+If it is not the requested document, stop and report source_mismatch.
+```
+
+This prevents the pipeline from summarizing a wrong source that happened to match the search query.
+
+## Output Note Metadata
+
+Generated notes should preserve the routing and query scope:
+
+```yaml
 source: notebooklm
 drive_url: {drive_url}
+drive_file_id: {drive_file_id}
+notebook_id: {topic_notebook_id}
+target_source_id: {target_source_id}
+sources_used: [{target_source_id}]
+notebook_policy: reuse_topic_notebook
+extraction_mode: source_scoped_topic_query
+query_scope: target_source_only
+topic: {topic_id}
 created: {YYYY-MM-DD}
 tags: [ai-generated, pdf-analysis]
----
-
-# {wiki_title}
-
-> AI 분석 요약 (원본: Google Drive PDF)
-> 생성: {YYYY-MM-DD} | 도구: NotebookLM → Claude Code
-
-{NotebookLM 분석 결과}
-
----
-*이 노트는 /pdf-to-wiki 커맨드로 자동 생성됨. 원본 PDF: [{파일명}]({drive_url})*
 ```
 
----
+## Testing
 
-## 인증 관리
-
-NotebookLM 쿠키는 2~4주마다 만료됩니다. 인증 오류 발생 시:
+Run deterministic routing tests:
 
 ```bash
-nlm login
+python3 -m unittest discover -v
 ```
 
-Free tier에서는 쿼리가 ~50회/일로 제한됩니다. 대량 처리 중 실패 시 인증 문제인지 일일 한도 초과인지 먼저 구분하세요.
+Run a CLI smoke test:
 
----
+```bash
+python3 scripts/notebook_registry.py \
+  "https://drive.google.com/file/d/YOUR_FILE_ID/view" \
+  --title "Trade Like a Stock Market Wizard" \
+  --topic investment-books
+```
 
-## 사용 사례
+## Guardrails
 
-**기준서·규정 정리** — K-IFRS, 감사기준, 법령처럼 길고 반복적으로 참조되는 PDF를 Wiki 노트로 변환합니다.
+- Do not download full Drive PDF content into the agent context.
+- Do not paste extracted PDF text into prompts.
+- Use Drive only for metadata and source IDs.
+- Use NotebookLM `source_add` for PDF ingestion.
+- Use `notebook_query(source_ids=[target_source_id])` for new note extraction.
+- Keep topic-level comparison questions separate from target-source note generation.
 
-**리서치 PDF 요약** — 논문, 리포트, 산업 분석 자료를 핵심 개념과 시사점 중심으로 정리합니다.
-
-**지식 베이스 구축** — 프로젝트마다 흩어진 PDF를 Obsidian의 연결형 Wiki로 축적합니다.
-
-**코딩 세션 맥락 재사용** — 한 번 정리한 노트를 이후 Claude Code 세션의 짧은 컨텍스트로 재사용합니다. 매번 PDF 전체를 다시 넣지 않아도 됩니다.
-
----
-
-## 주의사항
-
-**하지 말아야 할 것:**
-
-- Drive MCP로 PDF 본문 전체 다운로드 (`download_file_content` 사용 금지)
-- 로컬에서 PDF 텍스트 추출 후 프롬프트에 붙여넣기
-- 서로 무관한 여러 PDF를 하나의 NotebookLM 노트북에 혼합
-
-**올바른 방식:**
-
-- Drive MCP는 파일명·URL 확인에만 사용
-- PDF 1개 = NotebookLM 노트북 1개
-- NotebookLM source에는 Drive URL 또는 파일 ID만 전달
-
----
-
-## 실패 대응
-
-| 오류 | 원인 | 해결 |
-|------|------|------|
-| 인증 오류 | NotebookLM 쿠키 만료 | `nlm login` 재실행 후 세션 재시작 |
-| source 처리 지연 | NotebookLM PDF 처리 시간 | 1분 대기 후 source 상태 재확인 |
-| Drive 접근 오류 | PDF 공유 권한 없음 | Drive 파일 공유 설정 확인 |
-| 쿼리 한도 초과 | Free tier ~50회/일 제한 | 다음 날 재시도 또는 처리량 축소 |
-| 답변이 너무 일반적 | 프롬프트 맥락 부족 | "감사 실무자 관점에서", "K-IFRS 기준으로" 등 맥락 명시 |
-
----
-
-## 프로젝트 구성
+## Project Structure
 
 ```text
 .
+├── config/
+│   └── notebooks.example.json
 ├── commands/
-│   └── pdf-to-wiki.md      ← /pdf-to-wiki 슬래시 커맨드 (설치 시 ~/.claude/commands/ 에 복사)
-├── examples/
-│   ├── input.md            ← 실행 입력 예시
-│   └── output-note.md      ← 생성 노트 예시
-└── docs/
-    └── adr/
-        └── 0001-notebooklm-mcp-approach.md   ← NotebookLM vs Gemini API 선택 근거
+│   └── pdf-to-wiki.md
+├── scripts/
+│   └── notebook_registry.py
+├── tests/
+│   └── test_notebook_registry.py
+├── docs/
+│   ├── assets/
+│   └── adr/
+└── examples/
 ```
-
-## 설계 결정
-
-NotebookLM MCP 방식을 채택한 이유는 `docs/adr/0001-notebooklm-mcp-approach.md`에 정리되어 있습니다.
-
-- Gemini API는 공식적이고 안정적이지만 별도 API 키와 구현이 필요합니다.
-- NotebookLM MCP는 비공식 내부 API 기반이라 깨질 수 있지만, 설정이 간단하고 NotebookLM의 문서 처리 경험을 그대로 활용할 수 있습니다.
-- 이 파이프라인은 운영 시스템이라기보다 개인 지식 관리 도구이므로, 현재는 실용성이 우선입니다.
-
-## 로드맵
-
-- [ ] 여러 PDF 일괄 처리 플로우 ([#3](https://github.com/capitalparser/notebooklm-wiki-pipeline/issues/3))
-- [ ] 생성 노트의 wikilink 후보 자동 점검 ([#1](https://github.com/capitalparser/notebooklm-wiki-pipeline/issues/1))
-- [ ] NotebookLM 노트북 재사용 정책 ([#2](https://github.com/capitalparser/notebooklm-wiki-pipeline/issues/2))
-- [x] 샘플 입력/출력 노트 추가 (`examples/`)
-
-로드맵 항목은 GitHub Issues로 관리합니다.
-
-## 라이선스
-
-MIT License. 자세한 내용은 [LICENSE](LICENSE)를 참고하세요.
