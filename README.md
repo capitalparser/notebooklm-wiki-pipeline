@@ -19,7 +19,7 @@ MCP query with source_ids = target-PDF-only extraction
 
 ![Actual NotebookLM source-scoped notebook screen](docs/assets/notebooklm-source-scoped-live.png)
 
-The screenshot above is an actual NotebookLM notebook screen from a live MCP test. The notebook contains multiple investment-book sources in one topic notebook, including Mark Minervini, William O'Neil, and Jesse Livermore PDFs. For note generation, the MCP call used `source_ids=[target_source_id]`, and NotebookLM returned `sources_used` with only the target Minervini source.
+The screenshot above is an actual NotebookLM notebook screen from a live MCP test using original public-safe demo PDFs. The topic notebook contains three related infrastructure sources: clean energy grid planning, urban water resilience, and public transit operations. For note generation, the MCP call used `source_ids=[target_source_id]`, and NotebookLM returned `sources_used` with only the target clean-energy source.
 
 ---
 
@@ -40,20 +40,19 @@ The vNext pattern is:
 1 new wiki note = query only 1 target source inside that notebook
 ```
 
-For example, an `investment-books` notebook can contain:
+For example, a `public-infrastructure` notebook can contain:
 
-- `Trade Like a Stock Market Wizard` by Mark Minervini
-- `Think & Trade Like a Champion` by Mark Minervini
-- `How to Make Money in Stocks` by William O'Neil
-- `Jesse Livermore's Stock Trading Bible`
+- `clean_energy_grid_report.pdf`
+- `water_resilience_brief.pdf`
+- `public_transit_operations_note.pdf`
 
-When you want a wiki note for only the Minervini PDF, call:
+When you want a wiki note for only the clean-energy grid PDF, call:
 
 ```python
 notebook_query(
-    notebook_id="investment-books-topic-notebook",
-    source_ids=["target:minervini-superperformance"],
-    query="Summarize insights using only the target PDF."
+    notebook_id="public-infrastructure-topic-notebook",
+    source_ids=["target:clean-energy-grid-report"],
+    query="Summarize insights using only the Clean Energy Grid Planning Report."
 )
 ```
 
@@ -145,10 +144,10 @@ Example:
   "default_extraction_mode": "source_scoped_topic_query",
   "topics": [
     {
-      "id": "investment-books",
-      "label": "Investment Books",
-      "notebook_id": "NOTEBOOKLM_NOTEBOOK_ID_FOR_INVESTMENT_BOOKS",
-      "routing_keywords": ["Minervini", "O'Neil", "Livermore", "investment"],
+      "id": "public-infrastructure",
+      "label": "Public Infrastructure",
+      "notebook_id": "NOTEBOOKLM_NOTEBOOK_ID_FOR_PUBLIC_INFRASTRUCTURE",
+      "routing_keywords": ["clean energy", "water resilience", "public transit", "infrastructure"],
       "sources": []
     }
   ]
@@ -160,8 +159,8 @@ Check the routing decision locally:
 ```bash
 python3 scripts/notebook_registry.py \
   "https://drive.google.com/file/d/YOUR_FILE_ID/view" \
-  --title "Trade Like a Stock Market Wizard" \
-  --topic investment-books \
+  --title "Clean Energy Grid Planning Report" \
+  --topic public-infrastructure \
   --registry config/notebooks.local.json
 ```
 
@@ -169,7 +168,7 @@ Expected decision shape:
 
 ```json
 {
-  "topic_id": "investment-books",
+  "topic_id": "public-infrastructure",
   "notebook_action": "reuse_topic_notebook",
   "extraction_mode": "source_scoped_topic_query",
   "extraction_notebook_action": "reuse_topic_notebook",
@@ -254,8 +253,8 @@ Run a CLI smoke test:
 ```bash
 python3 scripts/notebook_registry.py \
   "https://drive.google.com/file/d/YOUR_FILE_ID/view" \
-  --title "Trade Like a Stock Market Wizard" \
-  --topic investment-books
+  --title "Clean Energy Grid Planning Report" \
+  --topic public-infrastructure
 ```
 
 ## Guardrails

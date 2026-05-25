@@ -4,7 +4,7 @@
 
 Drive에 있는 대용량 PDF를 Claude Code 컨텍스트에 직접 넣지 않고, NotebookLM이 먼저 읽게 한 뒤 결과만 받아 Obsidian Wiki 노트로 정리하는 토큰 절감 파이프라인입니다.
 
-**vNext 핵심 업데이트:** PDF마다 새 NotebookLM 노트북을 만들지 않고, 감사/회계, 스테이블코인, 투자 서적, 한국시장처럼 **주제별 Notebook**을 재사용할 수 있습니다. 동시에 신규 노트 생성 query는 방금 추가했거나 target으로 지정한 PDF source 하나로 제한합니다.
+**vNext 핵심 업데이트:** PDF마다 새 NotebookLM 노트북을 만들지 않고, 감사/회계, 스테이블코인, 공공 인프라, 한국시장처럼 **주제별 Notebook**을 재사용할 수 있습니다. 동시에 신규 노트 생성 query는 방금 추가했거나 target으로 지정한 PDF source 하나로 제한합니다.
 
 이 조합이 중요합니다. 주제별 Notebook은 장기적으로 재사용되는 지식 컨테이너이고, `source_ids`가 지정된 MCP query는 신규 Wiki 노트 생성 시 target PDF만 읽는 추출 단계입니다.
 
@@ -18,7 +18,7 @@ Drive에 있는 대용량 PDF를 Claude Code 컨텍스트에 직접 넣지 않�
 
 ![실제 NotebookLM source-scoped query 화면](docs/assets/notebooklm-source-scoped-live.png)
 
-위 스크린샷은 실제 NotebookLM 노트북 화면입니다. 하나의 주제 Notebook 안에 Mark Minervini, William O'Neil, Jesse Livermore PDF가 함께 들어 있고, 신규 노트 생성 시에는 MCP의 `source_ids=[target_source_id]`로 target PDF만 질의했습니다.
+위 스크린샷은 실제 NotebookLM 노트북 화면입니다. 저작권 리스크를 피하기 위해 직접 만든 공개 데모 PDF 3개를 사용했습니다. 하나의 공공 인프라 주제 Notebook 안에 clean energy, water resilience, public transit PDF가 함께 들어 있고, 신규 노트 생성 시에는 MCP의 `source_ids=[target_source_id]`로 clean energy target PDF만 질의했습니다.
 
 ![Topic notebook routing flow](docs/assets/topic-notebook-flow.svg)
 
@@ -39,24 +39,23 @@ vNext 방식은 다릅니다.
 신규 노트 생성 = 그 노트북 안의 target source 1개만 query
 ```
 
-예를 들어 투자 서적 주제 Notebook에 아래 PDF가 함께 들어 있을 수 있습니다.
+예를 들어 공공 인프라 주제 Notebook에 아래 PDF가 함께 들어 있을 수 있습니다.
 
-- `초수익 성장주 투자.pdf` — Mark Minervini
-- `챔피언처럼 생각하고 거래하라.pdf` — Mark Minervini
-- `윌리엄 오닐의 이기는 투자.pdf`
-- `제시 리버모어의 주식투자 바이블.pdf`
+- `clean_energy_grid_report.pdf`
+- `water_resilience_brief.pdf`
+- `public_transit_operations_note.pdf`
 
-이 상태에서 미너비니의 `초수익 성장주 투자.pdf`만 Wiki 노트로 만들고 싶다면, NotebookLM MCP query에 target source만 넘깁니다.
+이 상태에서 `clean_energy_grid_report.pdf`만 Wiki 노트로 만들고 싶다면, NotebookLM MCP query에 target source만 넘깁니다.
 
 ```python
 notebook_query(
-    notebook_id="investment-books-topic-notebook",
-    source_ids=["target:minervini-superperformance"],
-    query="대상 PDF만 기준으로 핵심 인사이트를 정리해줘"
+    notebook_id="public-infrastructure-topic-notebook",
+    source_ids=["target:clean-energy-grid-report"],
+    query="Clean Energy Grid Planning Report만 기준으로 핵심 인사이트를 정리해줘"
 )
 ```
 
-실제 MCP 테스트에서 같은 Notebook 안에 미너비니, 오닐, 리버모어 PDF가 함께 있었지만, `source_ids`를 미너비니 PDF 하나로 지정하자 응답의 `sources_used`도 해당 source 하나만 반환되었습니다. 즉, **Notebook은 주제별로 재사용하면서도 질문은 첨부/선택된 PDF 하나에 한정할 수 있습니다.**
+실제 MCP 테스트에서 같은 Notebook 안에 clean energy, water resilience, public transit PDF가 함께 있었지만, `source_ids`를 clean energy PDF 하나로 지정하자 응답의 `sources_used`도 해당 source 하나만 반환되었습니다. 즉, **Notebook은 주제별로 재사용하면서도 질문은 첨부/선택된 PDF 하나에 한정할 수 있습니다.**
 
 이 방식의 사용자 효익:
 
