@@ -1,6 +1,12 @@
 ---
 source: notebooklm
 drive_url: https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrStUvWxYz/view
+drive_file_id: 1AbCdEfGhIjKlMnOpQrStUvWxYz
+notebook_id: NOTEBOOKLM_NOTEBOOK_ID_FOR_AUDIT
+notebook_policy: reuse_topic_notebook
+extraction_mode: source_scoped_topic_query
+query_scope: target_source_only
+topic: audit-accounting
 created: 2026-05-16
 tags: [ai-generated, pdf-analysis]
 ---

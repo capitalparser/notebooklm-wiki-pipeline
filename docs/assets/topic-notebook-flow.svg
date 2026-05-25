@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="560" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
+  <title id="title">Topic notebook routing flow</title>
+  <desc id="desc">Flow diagram showing Drive PDFs routed through a topic registry to reusable NotebookLM notebooks and Obsidian notes.</desc>
+  <rect width="1120" height="560" rx="20" fill="#f8fafc"/>
+  <text x="56" y="66" fill="#0f172a" font-family="Arial, sans-serif" font-size="30" font-weight="700">Topic-first NotebookLM routing</text>
+  <text x="56" y="102" fill="#475569" font-family="Arial, sans-serif" font-size="18">Route related PDFs into curated topic notebooks; keep unknown PDFs isolated.</text>
+
+  <rect x="56" y="156" width="210" height="104" rx="10" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="82" y="198" fill="#0f172a" font-family="Arial, sans-serif" font-size="20" font-weight="700">Drive PDF</text>
+  <text x="82" y="228" fill="#64748b" font-family="Arial, sans-serif" font-size="16">URL or file ID only</text>
+
+  <path d="M 282 208 L 380 208" stroke="#64748b" stroke-width="3" fill="none"/>
+  <path d="M 380 208 L 366 200 L 366 216 Z" fill="#64748b"/>
+
+  <rect x="400" y="146" width="260" height="124" rx="10" fill="#ecfeff" stroke="#06b6d4"/>
+  <text x="428" y="190" fill="#155e75" font-family="Arial, sans-serif" font-size="20" font-weight="700">Topic registry</text>
+  <text x="428" y="220" fill="#0e7490" font-family="Arial, sans-serif" font-size="16">explicit --topic</text>
+  <text x="428" y="246" fill="#0e7490" font-family="Arial, sans-serif" font-size="16">keyword fallback + dedup</text>
+
+  <path d="M 676 184 L 770 148" stroke="#64748b" stroke-width="3" fill="none"/>
+  <path d="M 770 148 L 754 146 L 760 160 Z" fill="#64748b"/>
+  <path d="M 676 232 L 770 330" stroke="#64748b" stroke-width="3" fill="none"/>
+  <path d="M 770 330 L 764 315 L 754 326 Z" fill="#64748b"/>
+
+  <rect x="790" y="92" width="274" height="116" rx="10" fill="#f0fdf4" stroke="#22c55e"/>
+  <text x="820" y="136" fill="#166534" font-family="Arial, sans-serif" font-size="20" font-weight="700">Reuse topic notebook</text>
+  <text x="820" y="166" fill="#15803d" font-family="Arial, sans-serif" font-size="16">Audit, Stablecoin, Korea Market</text>
+
+  <rect x="790" y="294" width="274" height="116" rx="10" fill="#fff7ed" stroke="#f97316"/>
+  <text x="820" y="338" fill="#9a3412" font-family="Arial, sans-serif" font-size="20" font-weight="700">Create isolated notebook</text>
+  <text x="820" y="368" fill="#c2410c" font-family="Arial, sans-serif" font-size="16">Unknown or unrelated PDFs</text>
+
+  <path d="M 928 220 L 928 472" stroke="#94a3b8" stroke-width="3" stroke-dasharray="8 8" fill="none"/>
+  <path d="M 928 472 L 914 458 L 942 458 Z" fill="#94a3b8"/>
+
+  <rect x="350" y="448" width="420" height="70" rx="10" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="386" y="491" fill="#0f172a" font-family="Arial, sans-serif" font-size="20" font-weight="700">Obsidian wiki note with notebook_id, topic, source status</text>
+</svg>
