@@ -16,7 +16,7 @@ Drive에 있는 대용량 PDF를 Claude Code 컨텍스트에 직접 넣지 않�
 
 > 기본 출력 경로는 예시입니다. 설치 후 `commands/pdf-to-wiki.md`의 `OUTPUT_DIR`을 본인 Obsidian vault 경로로 바꿔서 사용하세요.
 
-![실제 NotebookLM source-scoped query 화면](docs/assets/notebooklm-source-scoped-live.png)
+![실제 NotebookLM source-scoped query 화면](docs/assets/notebooklm-source-scoped-public-demo.png)
 
 위 스크린샷은 실제 NotebookLM 노트북 화면입니다. 저작권 리스크를 피하기 위해 직접 만든 공개 데모 PDF 3개를 사용했습니다. 하나의 공공 인프라 주제 Notebook 안에 clean energy, water resilience, public transit PDF가 함께 들어 있고, 신규 노트 생성 시에는 MCP의 `source_ids=[target_source_id]`로 clean energy target PDF만 질의했습니다.
 

@@ -17,7 +17,7 @@ MCP query with source_ids = target-PDF-only extraction
 /pdf-to-wiki https://drive.google.com/file/d/YOUR_FILE_ID "K-IFRS 1109 Financial Instruments" --topic audit-accounting
 ```
 
-![Actual NotebookLM source-scoped notebook screen](docs/assets/notebooklm-source-scoped-live.png)
+![Actual NotebookLM source-scoped notebook screen](docs/assets/notebooklm-source-scoped-public-demo.png)
 
 The screenshot above is an actual NotebookLM notebook screen from a live MCP test using original public-safe demo PDFs. The topic notebook contains three related infrastructure sources: clean energy grid planning, urban water resilience, and public transit operations. For note generation, the MCP call used `source_ids=[target_source_id]`, and NotebookLM returned `sources_used` with only the target clean-energy source.
 
