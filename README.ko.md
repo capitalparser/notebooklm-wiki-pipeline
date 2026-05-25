@@ -20,7 +20,7 @@ Drive에 있는 대용량 PDF를 Claude Code 컨텍스트에 직접 넣지 않�
 
 위 스크린샷은 실제 NotebookLM 노트북 화면입니다. 저작권 리스크를 피하기 위해 직접 만든 공개 데모 PDF 3개를 사용했습니다. 하나의 공공 인프라 주제 Notebook 안에 clean energy, water resilience, public transit PDF가 함께 들어 있고, 신규 노트 생성 시에는 MCP의 `source_ids=[target_source_id]`로 clean energy target PDF만 질의했습니다.
 
-![Topic notebook routing flow](docs/assets/topic-notebook-flow.svg)
+![Topic notebook routing flow](docs/assets/topic-notebook-flow-readable.svg)
 
 ---
 

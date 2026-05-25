@@ -88,7 +88,7 @@ NotebookLM answer grounded in the target PDF
 Obsidian wiki note
 ```
 
-![Topic notebook routing flow](docs/assets/topic-notebook-flow.svg)
+![Topic notebook routing flow](docs/assets/topic-notebook-flow-readable.svg)
 
 ## Installation
 
