@@ -1,41 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="820" viewBox="0 0 1600 820" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="860" viewBox="0 0 1600 860" role="img" aria-labelledby="title desc">
   <title id="title">Topic notebook routing flow</title>
   <desc id="desc">Flow diagram showing Drive PDFs routed through a topic registry to reusable NotebookLM notebooks or isolated notebooks, then into Obsidian wiki notes.</desc>
-  <!-- README diagram guardrail: SVG text does not auto-wrap. Keep every box label manually split into separate text lines and verify it stays inside its rectangle. -->
-  <rect width="1600" height="820" rx="28" fill="#f8fafc"/>
+  <!-- README diagram guardrail: SVG text does not auto-wrap. Keep labels manually split and route arrows edge-to-edge without crossing boxes, labels, or tables. -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="12" markerHeight="12" orient="auto-start-reverse">
+      <path d="M 0 0 L 14 7 L 0 14 z" fill="#64748b"/>
+    </marker>
+    <marker id="arrow-soft" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="12" markerHeight="12" orient="auto-start-reverse">
+      <path d="M 0 0 L 14 7 L 0 14 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="860" rx="28" fill="#f8fafc"/>
 
   <text x="72" y="100" fill="#0f172a" font-family="Arial, sans-serif" font-size="44" font-weight="700">Topic-first NotebookLM routing</text>
   <text x="72" y="152" fill="#475569" font-family="Arial, sans-serif" font-size="28">Route related PDFs into curated topic notebooks; keep unknown PDFs isolated.</text>
 
-  <rect x="72" y="238" width="304" height="150" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-  <text x="110" y="300" fill="#0f172a" font-family="Arial, sans-serif" font-size="30" font-weight="700">Drive PDF</text>
-  <text x="110" y="344" fill="#64748b" font-family="Arial, sans-serif" font-size="24">URL or file ID only</text>
+  <rect x="72" y="300" width="304" height="144" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="110" y="360" fill="#0f172a" font-family="Arial, sans-serif" font-size="30" font-weight="700">Drive PDF</text>
+  <text x="110" y="404" fill="#64748b" font-family="Arial, sans-serif" font-size="24">URL or file ID only</text>
 
-  <path d="M 400 313 L 540 313" stroke="#64748b" stroke-width="5" fill="none"/>
-  <path d="M 540 313 L 518 301 L 518 325 Z" fill="#64748b"/>
+  <path d="M 404 372 L 520 372" stroke="#64748b" stroke-width="4" fill="none" marker-end="url(#arrow)"/>
 
-  <rect x="568" y="224" width="374" height="178" rx="16" fill="#ecfeff" stroke="#06b6d4" stroke-width="1.5"/>
-  <text x="608" y="292" fill="#155e75" font-family="Arial, sans-serif" font-size="30" font-weight="700">Topic registry</text>
-  <text x="608" y="338" fill="#0e7490" font-family="Arial, sans-serif" font-size="24">explicit --topic</text>
-  <text x="608" y="378" fill="#0e7490" font-family="Arial, sans-serif" font-size="24">keyword fallback + dedup</text>
+  <rect x="548" y="280" width="380" height="184" rx="16" fill="#ecfeff" stroke="#06b6d4" stroke-width="1.5"/>
+  <text x="588" y="350" fill="#155e75" font-family="Arial, sans-serif" font-size="30" font-weight="700">Topic registry</text>
+  <text x="588" y="396" fill="#0e7490" font-family="Arial, sans-serif" font-size="24">explicit --topic</text>
+  <text x="588" y="436" fill="#0e7490" font-family="Arial, sans-serif" font-size="24">keyword fallback + dedup</text>
 
-  <path d="M 966 284 L 1098 232" stroke="#64748b" stroke-width="5" fill="none"/>
-  <path d="M 1098 232 L 1072 229 L 1082 250 Z" fill="#64748b"/>
-  <path d="M 966 348 L 1098 488" stroke="#64748b" stroke-width="5" fill="none"/>
-  <path d="M 1098 488 L 1088 464 L 1070 481 Z" fill="#64748b"/>
+  <path d="M 960 334 L 1068 250" stroke="#64748b" stroke-width="4" fill="none" marker-end="url(#arrow)"/>
+  <path d="M 960 410 L 1068 526" stroke="#64748b" stroke-width="4" fill="none" marker-end="url(#arrow)"/>
 
-  <rect x="1126" y="146" width="394" height="168" rx="16" fill="#f0fdf4" stroke="#22c55e" stroke-width="1.5"/>
-  <text x="1170" y="208" fill="#166534" font-family="Arial, sans-serif" font-size="30" font-weight="700">Reuse topic notebook</text>
-  <text x="1170" y="254" fill="#15803d" font-family="Arial, sans-serif" font-size="24">Audit, Stablecoin, Korea Market</text>
+  <rect x="1068" y="154" width="430" height="168" rx="16" fill="#f0fdf4" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="1112" y="216" fill="#166534" font-family="Arial, sans-serif" font-size="30" font-weight="700">Reuse topic notebook</text>
+  <text x="1112" y="262" fill="#15803d" font-family="Arial, sans-serif" font-size="24">Audit, Stablecoin, Korea Market</text>
 
-  <rect x="1126" y="438" width="394" height="168" rx="16" fill="#fff7ed" stroke="#f97316" stroke-width="1.5"/>
-  <text x="1170" y="500" fill="#9a3412" font-family="Arial, sans-serif" font-size="30" font-weight="700">Create isolated notebook</text>
-  <text x="1170" y="546" fill="#c2410c" font-family="Arial, sans-serif" font-size="24">Unknown or unrelated PDFs</text>
+  <rect x="1068" y="454" width="430" height="168" rx="16" fill="#fff7ed" stroke="#f97316" stroke-width="1.5"/>
+  <text x="1112" y="516" fill="#9a3412" font-family="Arial, sans-serif" font-size="30" font-weight="700">Create isolated notebook</text>
+  <text x="1112" y="562" fill="#c2410c" font-family="Arial, sans-serif" font-size="24">Unknown or unrelated PDFs</text>
 
-  <path d="M 1323 330 L 1323 670" stroke="#94a3b8" stroke-width="5" stroke-dasharray="12 12" fill="none"/>
-  <path d="M 1323 670 L 1296 642 L 1350 642 Z" fill="#94a3b8"/>
+  <path d="M 1498 238 L 1534 238 L 1534 656 L 1240 656" stroke="#94a3b8" stroke-width="4" stroke-dasharray="12 12" fill="none"/>
+  <path d="M 1498 538 L 1534 538 L 1534 656 L 1240 656" stroke="#94a3b8" stroke-width="4" stroke-dasharray="12 12" fill="none"/>
+  <path d="M 1240 656 L 836 656 L 836 682" stroke="#94a3b8" stroke-width="4" fill="none" marker-end="url(#arrow-soft)"/>
 
-  <rect x="494" y="658" width="604" height="104" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-  <text x="544" y="705" fill="#0f172a" font-family="Arial, sans-serif" font-size="28" font-weight="700">Obsidian wiki note</text>
-  <text x="544" y="744" fill="#0f172a" font-family="Arial, sans-serif" font-size="26" font-weight="700">with notebook_id, topic, source status</text>
+  <rect x="538" y="690" width="596" height="108" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="588" y="738" fill="#0f172a" font-family="Arial, sans-serif" font-size="28" font-weight="700">Obsidian wiki note</text>
+  <text x="588" y="778" fill="#0f172a" font-family="Arial, sans-serif" font-size="26" font-weight="700">with notebook_id, topic, source status</text>
 </svg>
